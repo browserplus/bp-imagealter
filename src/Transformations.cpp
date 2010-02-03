@@ -340,13 +340,16 @@ static Image * cropTransform(const Image * inImage,
     const bp::List * l = (const bp::List *) args;
     for (unsigned int i = 0; i < 4; i++)
     {
-        if  (l->value(i)->type() != BPTDouble) {
+        if  (l->value(i)->type() == BPTDouble) {
+            cropParams[i] = (double) *(l->value(i));
+        } else if (l->value(i)->type() == BPTInteger) {
+            cropParams[i] = (double)((long long)*(l->value(i)));
+        } else {
             oError.append("crop accepts an array of four "
                           "floating point numbers");
             return NULL;
         }
 
-        cropParams[i] = (double) *(l->value(i));
         if (cropParams[i] < 0.0) cropParams[i] = 0.0;
         if (cropParams[i] > 1.0) cropParams[i] = 1.0;
     }
@@ -357,7 +360,6 @@ static Image * cropTransform(const Image * inImage,
                       " than x2/y2)");
         return NULL;
     }
-    
 
     // cropParams now contains x1, y1, x2, y2 in relative cordinates,
     // with origin at top left of image.  We'll use that information to
