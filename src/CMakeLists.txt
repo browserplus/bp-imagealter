@@ -36,6 +36,10 @@
 #####
 
 cmake_minimum_required(VERSION 2.6)
+IF (APPLE) 
+  SET (CMAKE_OSX_DEPLOYMENT_TARGET "10.4"
+       CACHE STRING "Compile for tiger deployment" FORCE)
+ENDIF (APPLE)
 
 INCLUDE(BuildConfigs.cmake)
 
