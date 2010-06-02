@@ -55,9 +55,6 @@ IF (NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "Release")
 ENDIF ()
 
-STRING(TOLOWER ${CMAKE_BUILD_TYPE} buildTypeLC)
-
-
 SET(ServiceTools ${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools)
 
 INCLUDE_DIRECTORIES(
@@ -69,7 +66,7 @@ INCLUDE_DIRECTORIES(
 
 LINK_DIRECTORIES(
   "${CMAKE_CURRENT_SOURCE_DIR}/../external/built/lib"
-  "${CMAKE_CURRENT_SOURCE_DIR}/../external/built/lib/${buildTypeLC}"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../external/built/lib/${CMAKE_BUILD_TYPE}"
 )
 
 SET(EXT_SRCS

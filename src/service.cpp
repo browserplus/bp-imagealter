@@ -45,8 +45,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <fstream>
+#include <string.h>
 
+#include <fstream>
 #include <iostream>
 #include <list>
 #include <sstream>

@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <assert.h>
+#include <strings.h>
 
 #ifdef WIN32
 #define strcasecmp _stricmp

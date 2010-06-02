@@ -32,24 +32,8 @@
 #endif
 
 #include <sstream>
-
-#if 0
-static
-std::string dirName(const std::string & path)
-{
-    // /foo/bar -> /foo
-    // /foo/    -> /foo
-    // /foo/bar/ -> /foo/bar 
-
-    std::string dirname;
-    size_t pos = path.rfind(PATH_SEP);
-    if (pos != std::string::npos) {
-        dirname = path.substr(0, pos);
-    }
-
-    return dirname;
-}
-#endif
+#include <string.h>
+#include <stdio.h>
 
 std::string
 ft::basename(const std::string & path)
