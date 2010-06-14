@@ -8,7 +8,8 @@ $order = {
                 "zlib",
                 "libpng",
                 "jpeg",
-                "GraphicsMagick"
+                "GraphicsMagick",
+                "service_testing"
                ],
   :verbose => true
 }

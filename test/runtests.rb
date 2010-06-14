@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
-require 'bp_service_runner'
+require File.join(File.dirname(File.dirname(File.expand_path(__FILE__))),
+                 "external/built/share/service_testing/bp_service_runner")
 require 'uri'
 
 clet = File.join(File.dirname(__FILE__), "..", "src", "build", "ImageAlter")
