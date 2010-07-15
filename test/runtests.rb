@@ -4,14 +4,12 @@ require File.join(File.dirname(File.dirname(File.expand_path(__FILE__))),
                  "external/built/share/service_testing/bp_service_runner")
 require 'uri'
 
-clet = File.join(File.dirname(__FILE__), "..", "src", "build", "ImageAlter")
-
 # arguments are a string that must match the test name
 substrpat = ARGV.length ? ARGV[0] : ""
 
 rv = 0
 curDir = File.dirname(__FILE__)
-BrowserPlus.run("#{curDir}/../src/build/ImageAlter") { |s|
+BrowserPlus.run("#{curDir}/../build/ImageAlter") { |s|
   tests = 0
   successes = 0
 
