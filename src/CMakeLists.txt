@@ -112,9 +112,11 @@ ADD_CUSTOM_COMMAND(TARGET ${serviceName} POST_BUILD
 # to work
 SET(pathToMagicMgk 
    "${CMAKE_CURRENT_SOURCE_DIR}/../external/built/share/GraphicsMagick-1.3.7/config/magic.mgk")
-IF (NOT EXISTS ${pathToMagicMgk})
-  MESSAGE(FATAL_ERROR "Can't find 'magick.mgk' file at '${pathToMagicMgk}'")
-ENDIF ()
+# this check would be good, but it occurs before the bakery build is kicked
+# off, so it's commented.
+# IF (NOT EXISTS ${pathToMagicMgk})
+#   MESSAGE(FATAL_ERROR "Can't find 'magick.mgk' file at '${pathToMagicMgk}'")
+# ENDIF ()
 
 ADD_CUSTOM_COMMAND(
   TARGET ${serviceName} POST_BUILD
