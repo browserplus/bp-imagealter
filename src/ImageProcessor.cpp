@@ -40,7 +40,6 @@
 #include <sstream>
 
 #include <assert.h>
-#include <strings.h>
 #include <string.h>
 
 #ifdef WIN32
