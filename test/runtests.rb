@@ -1,15 +1,65 @@
 #!/usr/bin/env ruby
 
+require 'optparse'
+require 'optparse/time'
+require 'ostruct'
 require File.join(File.dirname(File.dirname(File.expand_path(__FILE__))),
                  "external/built/share/service_testing/bp_service_runner")
 require 'uri'
 
+class OptparseExample
+  # Return a structure describing the options.
+  def self.parse(args)
+    # The options specified on the command line will be collected in *options*.
+    # We set default values here.
+    options = OpenStruct.new
+    options.subdir = "build"
+    options.substrpat = ""
+
+    opts = OptionParser.new do |opts|
+      opts.banner = "Usage: runtests.rb [options]"
+      opts.separator ""
+      opts.separator "Specific options:"
+
+      # Optional argument; build output location.
+      opts.on("-o", "--outputdir SUBDIR", String, "Specify subdir where output is located") do |subdir|
+        options.subdir = subdir
+      end
+
+      # Optional argument; tests.
+      opts.on("-t", "--test TEST", String, "Test name pattern") do |substrpat|
+        options.substrpat = substrpat
+      end
+
+      opts.separator ""
+      opts.separator "Common options:"
+
+      # No argument, shows at tail.  This will print an options summary.
+      # Try it and see!
+      opts.on_tail("-h", "--help", "Show this message") do
+        puts opts
+        exit
+      end
+
+      # Another typical switch to print the version.
+      opts.on_tail("--version", "Show version") do
+        puts OptionParser::Version.join('.')
+        exit
+      end
+    end
+
+    opts.parse!(args)
+    options
+  end
+end
+
 # arguments are a string that must match the test name
-substrpat = ARGV.length ? ARGV[0] : ""
+options = OptparseExample.parse(ARGV)
+substrpat = options.substrpat
 
 rv = 0
 curDir = File.dirname(__FILE__)
-BrowserPlus.run("#{curDir}/../build/ImageAlter") { |s|
+BrowserPlus.run("#{curDir}/../#{options.subdir}/ImageAlter") { |s|
   tests = 0
   successes = 0
 
