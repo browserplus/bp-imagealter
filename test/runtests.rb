@@ -44,12 +44,12 @@ end
 class TestFileAccess < Test::Unit::TestCase
   def setup
     # arguments are a string that must match the test name
-    @subdir = 'build/ImageAlter'
+    subdir = 'build/ImageAlter'
     if ENV.key?('BP_OUTPUT_DIR')
-      @subdir = ENV['BP_OUTPUT_DIR']
+      subdir = ENV['BP_OUTPUT_DIR']
     end
     @cwd = File.dirname(File.expand_path(__FILE__))
-    @service = File.join(@cwd, "../#{@subdir}")
+    @service = File.join(@cwd, "../#{subdir}")
   end
 
   def teardown
