@@ -12,7 +12,8 @@ def runTest_private(s, f, myself)
   p = File.join(File.dirname(__FILE__), "test_images", json["file"])
   p = File.expand_path(p)
   # now convert p into a file url
-  json["file"] = ((p[0] == "/") ? "file://" : "file:///" ) + p
+  #json["file"] = ((p[0] == "/") ? "file://" : "file:///" ) + p
+  json["file"] = "path:" + p
   took = Time.now
   r = s.transform(json)
   took = Time.now - took
