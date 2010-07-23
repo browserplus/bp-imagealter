@@ -217,12 +217,13 @@ class TestFileAccess < Test::Unit::TestCase
     }
   end
 
-  def test_sepia
-    BrowserPlus.run(@service) { |s|
-      f = File.join(File.dirname(__FILE__), "cases", "sepia.json")
-      runTest_private(s, f, self)
-    }
-  end
+  # disabled for now, at lth's request.  steve, any thoughts on if we should do more investigation or just delete this test?
+  #def test_sepia
+  #  BrowserPlus.run(@service) { |s|
+  #    f = File.join(File.dirname(__FILE__), "cases", "sepia.json")
+  #    runTest_private(s, f, self)
+  #  }
+  #end
 
   def test_sharpen
     BrowserPlus.run(@service) { |s|
