@@ -4,7 +4,7 @@ $cwd = File.dirname(__FILE__)
 require File.join($cwd, "bakery/ports/bakery")
 
 $order = {
-  :output_dir => File.join($cwd, "built"),
+  :output_dir => File.join($cwd, "dist"),
   :packages => [
                 "zlib",
                 "libpng",

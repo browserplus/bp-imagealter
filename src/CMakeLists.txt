@@ -58,15 +58,15 @@ ENDIF ()
 SET(ServiceTools ${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools)
 
 INCLUDE_DIRECTORIES(
-  "${CMAKE_CURRENT_SOURCE_DIR}/../external/built/include"
-  "${CMAKE_CURRENT_SOURCE_DIR}/../external/built/include/GraphicsMagick"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist/include"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist/include/GraphicsMagick"
   "${ServiceTools}/CppTools/external/bpsdk/include"
   "${ServiceTools}/CppTools/src"
 )
 
 LINK_DIRECTORIES(
-  "${CMAKE_CURRENT_SOURCE_DIR}/../external/built/lib"
-  "${CMAKE_CURRENT_SOURCE_DIR}/../external/built/lib/${CMAKE_BUILD_TYPE}"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist/lib"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist/lib/${CMAKE_BUILD_TYPE}"
 )
 
 SET(EXT_SRCS
@@ -111,7 +111,7 @@ ADD_CUSTOM_COMMAND(TARGET ${serviceName} POST_BUILD
 # to quickly identify files based on content, and is required for GM
 # to work
 SET(pathToMagicMgk 
-   "${CMAKE_CURRENT_SOURCE_DIR}/../external/built/share/GraphicsMagick-1.3.7/config/magic.mgk")
+   "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist/share/GraphicsMagick-1.3.7/config/magic.mgk")
 # this check would be good, but it occurs before the bakery build is kicked
 # off, so it's commented.
 # IF (NOT EXISTS ${pathToMagicMgk})
