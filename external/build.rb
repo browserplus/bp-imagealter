@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 
-$cwd = File.dirname(__FILE__)
-require File.join($cwd, "bakery/ports/bakery")
+require "bakery/ports/bakery"
 
+topDir = File.dirname(File.expand_path(__FILE__));
 $order = {
-  :output_dir => File.join($cwd, "dist"),
+  :output_dir => File.join(topDir, "dist"),
   :packages => [
                 "zlib",
                 "libpng",
