@@ -42,7 +42,7 @@ def runTest_private(s, f, myself)
   #  puts "fail (#{err} took #{took}s)"
 end
 
-class TestFileAccess < Test::Unit::TestCase
+class TestImageAlter < Test::Unit::TestCase
   def setup
     # arguments are a string that must match the test name
     subdir = 'build/ImageAlter'
