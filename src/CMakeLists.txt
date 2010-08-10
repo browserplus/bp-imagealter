@@ -39,19 +39,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.1)
 
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-framework/build_support/BuildConfigs.cmake)
 
-SET (serviceName ImageAlter)
-
-PROJECT(${serviceName}Service)
-
-SET (outputDir "${CMAKE_CURRENT_BINARY_DIR}/${serviceName}")
-
-SET(ServiceTools ${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools)
+SET(SERVICE_NAME ImageAlter)
+PROJECT(${SERVICE_NAME}Service)
 
 INCLUDE_DIRECTORIES(
   "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist/include/GraphicsMagick"
-  "${ServiceTools}/CppTools/external/bpsdk/include"
-  "${ServiceTools}/CppTools/src"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools/CppTools/external/bpsdk/include"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools/CppTools/src"
 )
 
 LINK_DIRECTORIES(
@@ -60,68 +55,32 @@ LINK_DIRECTORIES(
 )
 
 SET(EXT_SRCS
-  ${ServiceTools}/CppTools/src/bptypeutil.cpp
-  ${ServiceTools}/CppTools/src/bpurlutil.cpp
-  ${ServiceTools}/CppTools/src/bpservicedescription.cpp
-  ${ServiceTools}/CppTools/src/bpserviceversion.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools/CppTools/src/bptypeutil.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools/CppTools/src/bpurlutil.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools/CppTools/src/bpservicedescription.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools/CppTools/src/bpserviceversion.cpp
 )
 
-SET(SRCS service.cpp Transformations.hh ImageProcessor.cpp util/fileutil.cpp)
-SET(HDRS Transformations.cpp ImageProcessor.hh util/bpsync.hh util/bpthread.hh)
-
 # add required OS libs here
-SET(OSLIBS)
-
+SET(OS_LIBS)
 IF (WIN32)
    FILE(GLOB OS_SRCS "util/*_Windows.cpp")
    # these are separate libraries on winbloze
-   SET(OSLIBS GraphicsMagickCoders_s GraphicsMagickFilters_s)
-ELSE()
+   SET(OS_LIBS GraphicsMagickCoders_s GraphicsMagickFilters_s)
+ELSE ()
    FILE(GLOB OS_SRCS "util/*_Darwin.cpp" "util/*_UNIX.cpp")
 ENDIF ()
+SET(SRCS service.cpp Transformations.hh ImageProcessor.cpp util/fileutil.cpp ${EXT_SRCS} ${OS_SRCS})
+SET(HDRS Transformations.cpp ImageProcessor.hh util/bpsync.hh util/bpthread.hh)
+SET(LIBS GraphicsMagick_s png_s jpeg_s zlib_s ${OS_LIBS})
 
-ADD_LIBRARY(${serviceName} MODULE ${EXT_SRCS} ${SRCS} ${OS_SRCS} ${HDRS})
-
-TARGET_LINK_LIBRARIES(${serviceName}
-                      GraphicsMagick_s png_s jpeg_s zlib_s ${OSLIBS})
-
-# create service directory
-FILE(MAKE_DIRECTORY ${outputDir})
-
-# copy in manifest
-GET_TARGET_PROPERTY(loc ${serviceName} LOCATION)
-GET_FILENAME_COMPONENT(ServiceLibrary "${loc}" NAME)
-CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/manifest.json"
-               "${outputDir}/manifest.json")  
-ADD_CUSTOM_COMMAND(TARGET ${serviceName} POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                           \"${loc}\" \"${outputDir}\")
+BPAddCppService()
 
 # copy in magic.mgk - an xml lookup table that allows graphics magick
 # to quickly identify files based on content, and is required for GM
 # to work
-SET(pathToMagicMgk 
-   "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist/share/GraphicsMagick-1.3.7/config/magic.mgk")
-# this check would be good, but it occurs before the bakery build is kicked
-# off, so it's commented.
-# IF (NOT EXISTS ${pathToMagicMgk})
-#   MESSAGE(FATAL_ERROR "Can't find 'magick.mgk' file at '${pathToMagicMgk}'")
-# ENDIF ()
-
+SET(PATH_TO_MAGIC_MGK "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist/share/GraphicsMagick-1.3.7/config/magic.mgk")
 ADD_CUSTOM_COMMAND(
-  TARGET ${serviceName} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different \"${pathToMagicMgk}\" \"${outputDir}\")
+  TARGET ${SERVICE_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different \"${PATH_TO_MAGIC_MGK}\" \"${OUTPUT_DIR}\")
 
-IF (APPLE)
-  ADD_CUSTOM_COMMAND(TARGET ${serviceName} POST_BUILD
-                     COMMAND strip -x \"${outputDir}/${ServiceLibrary}\")
-ENDIF (APPLE)
-
-# Pre-build step, build our externals
-#
-ADD_CUSTOM_TARGET(
-    ${serviceName}Externals ALL
-    COMMAND ruby build.rb
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../external"
-    COMMENT Building externals...)
-ADD_DEPENDENCIES( ${serviceName} ${serviceName}Externals )
