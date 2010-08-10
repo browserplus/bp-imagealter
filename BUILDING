@@ -1,12 +1,14 @@
-1. git submodule init
-2. git submodule update
-3. mkdir build && cd build
-4. cmake ../src
-5. make (osx) or devenv (win32)
-
-You've done it!  now bp-imagealter/build/ImageAlter contains the 
-built service.  For your present directory you can run it:
-
-now you're ready to run tests:
-
-6. ../test/runtests.rb 
+how to build:
+ 
+ git submodule init
+ git submodule update
+ cd externals && ruby build.rb && cd ..
+ rm -rf build && mkdir build && cd build
+ cmake ../src (cmake -G "Visual Studio 9 2008" .. on Windows)
+ make (devenv ImageAlterService.sln on Windows)
+ cd test && ruby ./runtests.rb && cd ..
+ 
+A directory ImageAlter should be generated which is your service ready to 
+be installed using the BrowserPlus SDK:
+ 
+http://browserplus.yahoo.com/developer/service/sdk/
