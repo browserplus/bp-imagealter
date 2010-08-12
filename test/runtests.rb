@@ -56,6 +56,11 @@ class TestImageAlter < Test::Unit::TestCase
   def teardown
   end
 
+  def test_load_service
+    BrowserPlus.run(@service) { |s|
+    }
+  end
+
   def test_anim_gif_to_jpg
     BrowserPlus.run(@service) { |s|
       f = File.join(File.dirname(__FILE__), "cases", "anim_gif_to_jpg.json")
