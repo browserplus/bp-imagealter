@@ -11,7 +11,7 @@ include Config
 def runTest_private(s, f, myself)
   json = JSON.parse(File.read(f))
   # now let's change the 'file' param to a absolute URI
-  p = File.join(File.dirname(__FILE__), "test_images", json["file"])
+  p = File.join(File.dirname(__FILE__), "test_files", json["file"])
   p = File.expand_path(p)
   # now convert p into a file url
   #json["file"] = ((p[0] == "/") ? "file://" : "file:///" ) + p
