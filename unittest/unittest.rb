@@ -10,38 +10,15 @@ include Config
 
 def runTest_private(s, f, myself)
   json = JSON.parse(File.read(f))
-  # now let's change the 'file' param to a absolute URI
-  p = File.join(File.dirname(__FILE__), "test_files", json["file"])
-  p = File.expand_path(p)
-  # now convert p into a file url
-  #json["file"] = ((p[0] == "/") ? "file://" : "file:///" ) + p
-  json["file"] = "path:" + p
-  took = Time.now
+  json["file"] = "path:" + File.expand_path(File.join(File.dirname(__FILE__), "test_files", json["file"]))
   r = s.transform(json)
-  took = Time.now - took
-  imgGot = nil
-  #begin
   assert_nothing_raised {
-    imgGot = File.open(r['file'], "rb") { |oi| oi.read }
-    wantImgPath = File.join(File.dirname(f),
-                            File.basename(f, ".json") + ".out")
+    got = File.open(r['file'], "rb") { |oi| oi.read }
+    wantImgPath = File.join(File.dirname(f), File.basename(f, ".json") + ".out")
     raise "no output file for test!" if !File.exist? wantImgPath
-    imgWant = File.open(wantImgPath, "rb") { |oi| oi.read }
-    raise "output mismatch" if imgGot != imgWant
-    # yay!  it worked!
-    #puts "ok. (#{r['orig_width']}x#{r['orig_height']} -> #{r['width']}x#{r['height']} took #{took}s)"
+    want = File.open(wantImgPath, "rb") { |oi| oi.read }
+    raise "output mismatch" if got != want
   }
-  #rescue => e
-  #  err = e.to_s
-  #  # for convenience, if the test fails, we'll *save* the output
-  #  # image in xxx.got
-  #  if imgGot != nil
-  #    gotPath = File.join(File.dirname(f),
-  #                        File.basename(f, ".json") + ".got")
-  #    File.open(gotPath, "wb") { |oi| oi.write(imgGot) }
-  #    err += " [left result in #{File.basename(gotPath)}]"
-  #  end
-  #  puts "fail (#{err} took #{took}s)"
 end
 
 class TestImageAlter < Test::Unit::TestCase
