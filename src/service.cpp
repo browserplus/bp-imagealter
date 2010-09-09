@@ -205,7 +205,7 @@ BPPInitialize(const BPCFunctionTable * bpCoreFunctions,
         s_desc.setName("ImageAlter");
         s_desc.setMajorVersion(4);
         s_desc.setMinorVersion(0);
-        s_desc.setMicroVersion(5);
+        s_desc.setMicroVersion(6);
         s_desc.setDocString("Implements client side Image manipulation");
 
         // let's add functions, start with 'transform'
