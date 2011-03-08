@@ -7,7 +7,6 @@ require 'test/unit'
 require 'open-uri'
 require 'rbconfig'
 include Config
-require 'ftools'
 
 def runTest_private(s, f, myself)
   json = JSON.parse(File.read(f))
