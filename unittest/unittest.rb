@@ -7,16 +7,17 @@ require 'test/unit'
 require 'open-uri'
 require 'rbconfig'
 include Config
+require 'ftools'
 
 def runTest_private(s, f, myself)
   json = JSON.parse(File.read(f))
   json["file"] = "path:" + File.expand_path(File.join(File.dirname(__FILE__), "test_files", json["file"]))
   r = s.transform(json)
   assert_nothing_raised {
-    got = File.open(r['file'], "rb") { |oi| oi.read }
     wantImgPath = File.join(File.dirname(f), File.basename(f, ".json") + ".out")
     raise "no output file for test!" if !File.exist? wantImgPath
     want = File.open(wantImgPath, "rb") { |oi| oi.read }
+    got = File.open(r['file'], "rb") { |oi| oi.read }
     raise "output mismatch" if got != want
   }
 end
@@ -202,13 +203,12 @@ class TestImageAlter < Test::Unit::TestCase
     }
   end
 
-  # disabled for now, at lth's request.  steve, any thoughts on if we should do more investigation or just delete this test?
-  #def test_sepia
-  #  BrowserPlus.run(@service, @providerDir) { |s|
-  #    f = File.join(File.dirname(__FILE__), "cases", "sepia.json")
-  #    runTest_private(s, f, self)
-  #  }
-  #end
+  def test_sepia
+    BrowserPlus.run(@service, @providerDir) { |s|
+      f = File.join(File.dirname(__FILE__), "cases", "sepia.json")
+      runTest_private(s, f, self)
+    }
+  end
 
   def test_sharpen
     BrowserPlus.run(@service, @providerDir) { |s|
