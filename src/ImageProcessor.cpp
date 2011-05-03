@@ -32,13 +32,10 @@
 
 #include "ImageProcessor.hh"
 #include "Transformations.hh"
-#include "util/fileutil.hh"
 #include "magick/api.h"
-
 #include "service.hh"
-
+#include "bp-file/bpfile.h"
 #include <sstream>
-
 #include <assert.h>
 #include <string.h>
 
@@ -238,43 +235,36 @@ IP_ReadImageFile(const ImageInfo * image_info,
  {
     if (path.empty()) return NULL;
     
-    FILE * f = ft::fopen_binary_read(path);    
-    if (!f) {
+    std::ifstream fstream;
+    if (!bp::file::openReadableStream(fstream, path, std::ios_base::in | std::ios_base::binary)) {
         g_bpCoreFunctions->log(
             BP_ERROR, "Couldn't open file for reading: %s", path.c_str());
         return NULL;
     }
-
-    // determine length of file
-    int sought = fseek(f, 0L, SEEK_END);
-	long len = ftell(f);
-    (void) fseek(f, 0L, SEEK_SET);
-
-    if (sought || len <= 0) {
+    // get filesize
+    fstream.seekg(0, std::ios::end);
+    size_t len = (size_t) fstream.tellg();
+    fstream.seekg(0, std::ios::beg);
+    //bplus::service::Service::log(BP_DEBUG, "file size = " + size);
+    if (len <= 0) {
         g_bpCoreFunctions->log(
             BP_ERROR, "Couldn't determine file length: %s", path.c_str());
-        fclose(f);
         return NULL;
     }
-
     void * img = malloc(len);
     if (!img) {
         g_bpCoreFunctions->log(
             BP_ERROR, "memory allocation failed (%ld bytes) when trying to "
             "read image", len);
-        fclose(f);
         return NULL;
     }
-
     g_bpCoreFunctions->log(
         BP_INFO, "Attempting to read %ld bytes from '%s'",
         len, path.c_str());
-
-    size_t rd = fread(img, sizeof(unsigned char), len, f);
-
-    fclose(f); // done with this file handle
-    
-    if ((long) rd != len) {
+    fstream.read((char*)img, len);
+    size_t rd = (size_t)fstream.gcount();
+    fstream.close();
+    if (rd != len) {
         g_bpCoreFunctions->log(
             BP_ERROR, "Partial read detected, got %ld of %ld bytes",
             rd, len);
@@ -381,7 +371,8 @@ imageproc::ChangeImage(const std::string & inPath,
 
     // let's set the output format correctly (default to input format)
     std::string name;
-    if (outputFormat == UNKNOWN) name.append(ft::basename(inPath));
+    boost::filesystem::path inPath1(inPath);
+    if (outputFormat == UNKNOWN) name.append(inPath1.stem().string());
     else {
         name.append("img.");
         name.append(typeToExt(outputFormat));
@@ -410,35 +401,37 @@ imageproc::ChangeImage(const std::string & inPath,
         }
         else
         {
+            g_bpCoreFunctions->log(BP_INFO, "Creating tempdir %s",
+                                   tmpDir.c_str());
             g_bpCoreFunctions->log(BP_INFO, "Writing %lu bytes to %s",
                                    l, name.c_str());
 
-            if (!ft::mkdir(tmpDir, false)) {
+            if (!boost::filesystem::is_directory(tmpDir) && !boost::filesystem::create_directory(tmpDir)) {
                 oError.append("Couldn't create temp dir");
             } else {
-                std::string outpath = ft::getPath(tmpDir, name);
-                FILE * f = ft::fopen_binary_write(outpath);
-                if (f == NULL) { 
+                std::ofstream ofs;
+                boost::filesystem::path outpath = bp::file::getTempPath(tmpDir, name);
+                if (!bp::file::openWritableStream(ofs, outpath, std::ios_base::out | std::ios_base::binary)) {
+                    throw std::string("unable to create new file");
                     g_bpCoreFunctions->log(
                         BP_ERROR, "Couldn't open '%s' for writing!",
-                        outpath.c_str());
+                        outpath.string().c_str());
+                    oError.append("Error saving output image");
+                }
+                ofs.write((const char*)blob, l);
+                bool bad = ofs.bad();
+                ofs.close();
+
+                if (bad) {
+                    g_bpCoreFunctions->log(
+                        BP_ERROR,
+                        "Bad write (\?\?/%lu) when writing resultant "
+                        "image '%s'",
+                        l, outpath.string().c_str());
                     oError.append("Error saving output image");
                 } else {
-                    size_t wt;
-                    wt = fwrite(blob, sizeof(char), l, f);
-                    fclose(f);
-
-                    if (wt != l) {
-                        g_bpCoreFunctions->log(
-                            BP_ERROR,
-                            "Partial write (%lu/%lu) when writing resultant "
-                            "image '%s'",
-                            wt, l, outpath.c_str());
-                        oError.append("Error saving output image");
-                    } else {
-                        // success!
-                        rv = outpath;
-                    }
+                    // success!
+                    rv = outpath.string();
                 }
             }
         }

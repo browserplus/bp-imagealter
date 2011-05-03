@@ -18,9 +18,16 @@ $order = {
                 "libpng",
                 "jpeg",
                 "GraphicsMagick",
+                "bp-file",
                 "service_testing"
                ],
-  :verbose => true
+  :verbose => true,
+  :use_source => {
+    "bp-file"=>File.join(topDir, "bp-file")
+  },
+  :use_recipe => {
+    "bp-file"=>File.join(topDir, "bp-file", "recipe.rb")
+  }
 }
 
 b = Bakery.new $order

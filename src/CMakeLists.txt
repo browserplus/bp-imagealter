@@ -44,6 +44,7 @@ INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-build-templates/cmake/BuildCo
 
 INCLUDE_DIRECTORIES(
   "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist/include"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-framework/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist/include/GraphicsMagick"
   "${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools/CppTools/external/bpsdk/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools/CppTools/src"
@@ -71,15 +72,21 @@ SET(EXT_SRCS
 # add required OS libs here
 SET(OS_LIBS)
 IF (WIN32)
-   FILE(GLOB OS_SRCS "util/*_Windows.cpp")
-   # these are separate libraries on winbloze
+   # Visual Studio does some autolink magic with boost, no need
+   # to specify library
    SET(OS_LIBS GraphicsMagickCoders_s GraphicsMagickFilters_s)
 ELSE ()
-   FILE(GLOB OS_SRCS "util/*_Darwin.cpp" "util/*_UNIX.cpp")
+   SET(BOOST_LIBS "boost_filesystem" "boost_system")
+   IF (APPLE)
+       # need carbon headers and library
+       FIND_LIBRARY(CARBON_LIBRARY Carbon)
+       MARK_AS_ADVANCED(CARBON_LIBRARY)
+       SET(OS_LIBS ${CARBON_LIBRARY})
+   ENDIF()
 ENDIF ()
-SET(SRCS service.cpp Transformations.hh ImageProcessor.cpp util/fileutil.cpp ${EXT_SRCS} ${OS_SRCS})
-SET(HDRS Transformations.cpp ImageProcessor.hh util/bpsync.hh util/bpthread.hh)
-SET(LIBS GraphicsMagick_s png_s jpeg_s zlib_s ${OS_LIBS})
+SET(SRCS service.cpp Transformations.hh ImageProcessor.cpp ${EXT_SRCS})
+SET(HDRS Transformations.cpp ImageProcessor.hh)
+SET(LIBS GraphicsMagick_s png_s jpeg_s zlib_s bpfile_s ${BOOST_LIBS} ${OS_LIBS})
 
 BPAddCppService()
 

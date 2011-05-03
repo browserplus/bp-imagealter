@@ -34,19 +34,13 @@
 #include "bptypeutil.hh"
 #include "bpurlutil.hh"
 #include "bpservicedescription.hh"
-
-#include "util/bpsync.hh"
-#include "util/bpthread.hh"
-#include "util/fileutil.hh"
-
 #include "ImageProcessor.hh"
 #include "Transformations.hh"
-
+#include "bp-file/bpfile.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-
 #include <fstream>
 #include <iostream>
 #include <list>
@@ -69,7 +63,7 @@ BPPAllocate(void ** instance, unsigned int, const BPElement * context)
     sd->tempDir = (std::string) (*(args->get("temp_dir")));
     delete args;
 
-    (void) ft::mkdir(sd->tempDir);
+    boost::filesystem::create_directory(sd->tempDir);
     g_bpCoreFunctions->log(BP_INFO, "session allocated, using temp dir: %s",
                            (sd->tempDir.empty() ? "<empty>"
                                                 : sd->tempDir.c_str()));
