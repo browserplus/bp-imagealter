@@ -33,7 +33,6 @@
 #include "ImageProcessor.hh"
 #include "Transformations.hh"
 #include "magick/api.h"
-#include "service.hh"
 #include "bp-file/bpfile.h"
 #include <sstream>
 #include <assert.h>
@@ -87,7 +86,9 @@ imageproc::init()
         arr++;
     }
     ss << " ]";
+#if 0
     g_bpCoreFunctions->log(BP_INFO, ss.str().c_str());
+#endif // 0
 
     ss.str("");
     ss << "Supported transformations: [ ";
@@ -99,7 +100,9 @@ imageproc::init()
         ss << trans::get(i)->name;
     }
     ss << " ]";
+#if 0
     g_bpCoreFunctions->log(BP_INFO, ss.str().c_str());
+#endif // 0
 }
 
 void
@@ -142,19 +145,21 @@ imageproc::typeToExt(Type t)
 
 static
 Image * runTransformations(Image * image,
-                           const bp::List & transList,
+                           const bplus::List & transList,
                            int quality, std::string & oError)
 {
+#if 0
     g_bpCoreFunctions->log(
         BP_INFO, "%lu transformation actions specified",
         transList.size());
+#endif // 0
     
     for (unsigned int i = 0; i < transList.size(); i++)
     {
-        const bp::Object * o = transList.value(i);
+        const bplus::Object * o = transList.value(i);
 
         std::string command;
-        const bp::Object * args = NULL;
+        const bplus::Object * args = NULL;
         
         // o may either be a string transformation: i.e. "solarize"
         // or a may transform: i.e. { "crop": { .25, .75, .25, .75 } }
@@ -162,7 +167,7 @@ Image * runTransformations(Image * image,
         if (o->type() == BPTString) {
             command = (std::string)(*o);            
         } else  if (o->type() == BPTMap) {
-            const bp::Map * m = (const bp::Map *) o;
+            const bplus::Map * m = (const bplus::Map *) o;
             if (m->size() != 1) {
                 std::stringstream ss;
                 ss << "transform " << i << " is malformed.  An action is  "
@@ -171,7 +176,7 @@ Image * runTransformations(Image * image,
                 oError = ss.str();
                 break;
             }
-            bp::Map::Iterator i(*m);
+            bplus::Map::Iterator i(*m);
             command.append(i.nextKey());
             args = m->get(command.c_str());
             assert(args != NULL);
@@ -184,9 +189,11 @@ Image * runTransformations(Image * image,
             break;
         }
 
+#if 0
         g_bpCoreFunctions->log(
             BP_INFO, "transform [%s] with%s args",
             command.c_str(), (args ? "" : "out"));
+#endif // 0
 
         // does the command exist?
         const trans::Transformation * t = trans::get(command);
@@ -237,8 +244,10 @@ IP_ReadImageFile(const ImageInfo * image_info,
     
     std::ifstream fstream;
     if (!bp::file::openReadableStream(fstream, path, std::ios_base::in | std::ios_base::binary)) {
+#if 0
         g_bpCoreFunctions->log(
             BP_ERROR, "Couldn't open file for reading: %s", path.c_str());
+#endif // 0
         return NULL;
     }
     // get filesize
@@ -247,27 +256,35 @@ IP_ReadImageFile(const ImageInfo * image_info,
     fstream.seekg(0, std::ios::beg);
     //bplus::service::Service::log(BP_DEBUG, "file size = " + size);
     if (len <= 0) {
+#if 0
         g_bpCoreFunctions->log(
             BP_ERROR, "Couldn't determine file length: %s", path.c_str());
+#endif // 0
         return NULL;
     }
     void * img = malloc(len);
     if (!img) {
+#if 0
         g_bpCoreFunctions->log(
             BP_ERROR, "memory allocation failed (%ld bytes) when trying to "
             "read image", len);
+#endif // 0
         return NULL;
     }
+#if 0
     g_bpCoreFunctions->log(
         BP_INFO, "Attempting to read %ld bytes from '%s'",
         len, path.c_str());
+#endif // 0
     fstream.read((char*)img, len);
     size_t rd = (size_t)fstream.gcount();
     fstream.close();
     if (rd != len) {
+#if 0
         g_bpCoreFunctions->log(
             BP_ERROR, "Partial read detected, got %ld of %ld bytes",
             rd, len);
+#endif // 0
         free(img);
         return NULL;
     }
@@ -275,7 +292,9 @@ IP_ReadImageFile(const ImageInfo * image_info,
     // now convert it into a GM image 
     Image * i = BlobToImage(image_info, img, len, exception);
 
+#if 0
     g_bpCoreFunctions->log(BP_ERROR, "read img: %p", i);
+#endif // 0
 
     free(img);
 
@@ -287,7 +306,7 @@ std::string
 imageproc::ChangeImage(const std::string & inPath,
                        const std::string & tmpDir,
                        Type outputFormat,
-                       const bp::List & transformations,
+                       const bplus::List & transformations,
                        int quality,
                        unsigned int & x, unsigned int & y, 
                        unsigned int & orig_x, unsigned int & orig_y, 
@@ -305,12 +324,14 @@ imageproc::ChangeImage(const std::string & inPath,
     // first we read the image
     if (exception.severity != UndefinedException)
     {
+#if 0
 		if (exception.reason)
             g_bpCoreFunctions->log(BP_ERROR, "after: %s\n",
                                    exception.reason);
 		if (exception.description)
             g_bpCoreFunctions->log(BP_ERROR, "after: %s\n",
                                    exception.description);
+#endif // 0
 		CatchException(&exception);
     }
 
@@ -320,12 +341,14 @@ imageproc::ChangeImage(const std::string & inPath,
     
     if (exception.severity != UndefinedException)
     {
+#if 0
 		if (exception.reason)
             g_bpCoreFunctions->log(BP_ERROR, "after: %s\n",
                                    exception.reason);
 		if (exception.description)
             g_bpCoreFunctions->log(BP_ERROR, "after: %s\n",
                                    exception.description);
+#endif // 0
 		CatchException(&exception);
     }
     
@@ -338,18 +361,22 @@ imageproc::ChangeImage(const std::string & inPath,
         return std::string();
     }
 
+#if 0
 	g_bpCoreFunctions->log(
         BP_INFO, "Image contains %lu frames, type: %s\n",
         GetImageListLength(images),
         images->magick);
+#endif // 0
 
     // set quality
     if (quality > 100) quality = 100;
     if (quality < 0) quality = 0;
     image_info->quality = quality;
 
+#if 0
     g_bpCoreFunctions->log(
         BP_INFO, "Quality set to %d (0-100, worst-best)", quality);
+#endif // 0
 
     // execute 'actions' 
     images = runTransformations(images, transformations, quality, oError);
@@ -377,7 +404,9 @@ imageproc::ChangeImage(const std::string & inPath,
         name.append("img.");
         name.append(typeToExt(outputFormat));
         (void) sprintf(images->magick, outputFormat);
+#if 0
         g_bpCoreFunctions->log(BP_INFO, "Output to format: %s", outputFormat);
+#endif // 0
     }
     
     // Now let's go directly from blob to file.  We bypass
@@ -401,10 +430,14 @@ imageproc::ChangeImage(const std::string & inPath,
         }
         else
         {
+#if 0
             g_bpCoreFunctions->log(BP_INFO, "Creating tempdir %s",
                                    tmpDir.c_str());
+#endif // 0
+#if 0
             g_bpCoreFunctions->log(BP_INFO, "Writing %lu bytes to %s",
                                    l, name.c_str());
+#endif // 0
 
             if (!boost::filesystem::is_directory(tmpDir) && !boost::filesystem::create_directory(tmpDir)) {
                 oError.append("Couldn't create temp dir");
@@ -413,9 +446,11 @@ imageproc::ChangeImage(const std::string & inPath,
                 boost::filesystem::path outpath = bp::file::getTempPath(tmpDir, name);
                 if (!bp::file::openWritableStream(ofs, outpath, std::ios_base::out | std::ios_base::binary)) {
                     throw std::string("unable to create new file");
+#if 0
                     g_bpCoreFunctions->log(
                         BP_ERROR, "Couldn't open '%s' for writing!",
                         outpath.string().c_str());
+#endif // 0
                     oError.append("Error saving output image");
                 }
                 ofs.write((const char*)blob, l);
@@ -423,11 +458,13 @@ imageproc::ChangeImage(const std::string & inPath,
                 ofs.close();
 
                 if (bad) {
+#if 0
                     g_bpCoreFunctions->log(
                         BP_ERROR,
                         "Bad write (\?\?/%lu) when writing resultant "
                         "image '%s'",
                         l, outpath.string().c_str());
+#endif // 0
                     oError.append("Error saving output image");
                 } else {
                     // success!

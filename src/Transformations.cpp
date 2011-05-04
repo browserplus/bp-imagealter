@@ -1,5 +1,4 @@
 #include "Transformations.hh"
-#include "service.hh"
 
 #include <sstream>
 
@@ -11,7 +10,7 @@
 #endif
 
 static Image * noopTransform(const Image * inImage,
-                             const bp::Object * args,
+                             const bplus::Object * args,
                              int quality, std::string &oError)
 {
     ExceptionInfo exception;
@@ -23,7 +22,7 @@ static Image * noopTransform(const Image * inImage,
 
 
 static Image * blurTransform(const Image * inImage,
-                             const bp::Object * args,
+                             const bplus::Object * args,
                              int quality, std::string &oError)
 {
     ExceptionInfo exception;
@@ -34,7 +33,7 @@ static Image * blurTransform(const Image * inImage,
 }
 
 static Image * sharpenTransform(const Image * inImage,
-                             const bp::Object * args,
+                             const bplus::Object * args,
                              int quality, std::string &oError)
 {
     ExceptionInfo exception;
@@ -45,7 +44,7 @@ static Image * sharpenTransform(const Image * inImage,
 }
 
 static Image * unsharpenTransform(const Image * inImage,
-                             const bp::Object * args,
+                             const bplus::Object * args,
                              int quality, std::string &oError)
 {
     ExceptionInfo exception;
@@ -57,7 +56,7 @@ static Image * unsharpenTransform(const Image * inImage,
 
 
 static Image * despeckleTransform(const Image * inImage,
-                                  const bp::Object * args,
+                                  const bplus::Object * args,
                                   int quality, std::string &oError)
 {
     ExceptionInfo exception;
@@ -69,7 +68,7 @@ static Image * despeckleTransform(const Image * inImage,
 
 
 static Image * enhanceTransform(const Image * inImage,
-                                const bp::Object * args,
+                                const bplus::Object * args,
                                 int quality, std::string &oError)
 {
     ExceptionInfo exception;
@@ -81,7 +80,7 @@ static Image * enhanceTransform(const Image * inImage,
 
 
 static Image * solarizeTransform(const Image * inImage,
-                                 const bp::Object * args,
+                                 const bplus::Object * args,
                                  int quality, std::string &oError)
 {
     ExceptionInfo exception;
@@ -99,7 +98,7 @@ static Image * solarizeTransform(const Image * inImage,
 }
 
 static Image * contrastTransform(const Image * inImage,
-                                 const bp::Object * args,
+                                 const bplus::Object * args,
                                  int quality, std::string &oError)
 {
     int contrast = 1;
@@ -143,7 +142,7 @@ static Image * contrastTransform(const Image * inImage,
 
 
 static Image * oilpaintTransform(const Image * inImage,
-                                 const bp::Object * args,
+                                 const bplus::Object * args,
                                  int quality, std::string &oError)
 {
     ExceptionInfo exception;
@@ -155,7 +154,7 @@ static Image * oilpaintTransform(const Image * inImage,
 
 
 static Image * rotateTransform(const Image * inImage,
-                               const bp::Object * args,
+                               const bplus::Object * args,
                                int quality, std::string &oError)
 {
     double degrees = 90;
@@ -179,7 +178,7 @@ static Image * rotateTransform(const Image * inImage,
 
 
 static Image * swirlTransform(const Image * inImage,
-                              const bp::Object * args,
+                              const bplus::Object * args,
                               int quality, std::string &oError)
 {
     double degrees = 90;
@@ -205,7 +204,7 @@ static Image * swirlTransform(const Image * inImage,
 static bool
 extractScalingDimensions(const char * funcName,
                          const Image * inImage,                         
-                         const bp::Object * args,
+                         const bplus::Object * args,
                          unsigned int &x,
                          unsigned int &y,                         
                          std::string &oError)
@@ -223,11 +222,11 @@ extractScalingDimensions(const char * funcName,
         return NULL;
     }
 
-    bp::Map::Iterator i(*((const bp::Map *) args));
+    bplus::Map::Iterator i(*((const bplus::Map *) args));
     const char * k;
     while (NULL != (k=i.nextKey())) {
         int * num = NULL;
-        const bp::Object * v = args->get(k);
+        const bplus::Object * v = args->get(k);
         if (!strcasecmp("maxwidth", k)) num = &maxwidth;
         else if (!strcasecmp("maxheight", k)) num = &maxheight;
         else {
@@ -273,18 +272,20 @@ extractScalingDimensions(const char * funcName,
         y *= scale;
     }
 
+#if 0
     // log about it
     g_bpCoreFunctions->log(
         BP_INFO,
         "scaling parameters [mw: %d | mh: %d]: "
         "from (%lu, %lu) to (%lu, %lu)",
         maxwidth, maxheight, origx, origy, x, y);
+#endif // 0
 
     return true;
 }
 
 static Image * scaleTransform(const Image * inImage,
-                              const bp::Object * args,
+                              const bplus::Object * args,
                               int quality, std::string &oError)
 {
     unsigned int x = 0, y = 0;
@@ -303,7 +304,7 @@ static Image * scaleTransform(const Image * inImage,
 }
 
 static Image * thumbnailTransform(const Image * inImage,
-                                   const bp::Object * args,
+                                   const bplus::Object * args,
                                    int quality, std::string &oError)
 {
     unsigned int x = 0, y = 0;
@@ -324,7 +325,7 @@ static Image * thumbnailTransform(const Image * inImage,
 
 
 static Image * cropTransform(const Image * inImage,
-                             const bp::Object * args,
+                             const bplus::Object * args,
                              int quality, std::string &oError)
 {
     // first we'll validate and extract parameters
@@ -332,13 +333,13 @@ static Image * cropTransform(const Image * inImage,
     assert(args != NULL);
     
     if (!args || args->type() != BPTList ||
-        ((const bp::List *) args)->size() != 4)
+        ((const bplus::List *) args)->size() != 4)
     {
         oError.append("crop accepts an array of four floating point numbers");
         return NULL;
     }
 
-    const bp::List * l = (const bp::List *) args;
+    const bplus::List * l = (const bplus::List *) args;
     for (unsigned int i = 0; i < 4; i++)
     {
         if  (l->value(i)->type() == BPTDouble) {
@@ -376,10 +377,12 @@ static Image * cropTransform(const Image * inImage,
     ri.x = x * cropParams[0];
     ri.y = y * cropParams[1];
 
+#if 0
     g_bpCoreFunctions->log(
         BP_INFO,
         "Cropping image (%lux%lu): %lux%lu starting at %lu,%lu",
         x, y, ri.width, ri.height, ri.x, ri.y);
+#endif // 0
     
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
@@ -391,7 +394,7 @@ static Image * cropTransform(const Image * inImage,
 
 
 static Image * equalizeTransform(const Image * inImage,
-                                  const bp::Object * args,
+                                  const bplus::Object * args,
                                   int quality, std::string &oError)
 {
     ExceptionInfo exception;
@@ -409,7 +412,7 @@ static Image * equalizeTransform(const Image * inImage,
 }
 
 static Image * normalizeTransform(const Image * inImage,
-                                  const bp::Object * args,
+                                  const bplus::Object * args,
                                   int quality, std::string &oError)
 {
     ExceptionInfo exception;
@@ -428,7 +431,7 @@ static Image * normalizeTransform(const Image * inImage,
 
 
 static Image * ditherTransform(const Image * inImage,
-                               const bp::Object * args,
+                               const bplus::Object * args,
                                int quality, std::string &oError)
 {
     ExceptionInfo exception;
@@ -447,7 +450,7 @@ static Image * ditherTransform(const Image * inImage,
 
 
 static Image * grayscaleTransform(const Image * inImage,
-                                  const bp::Object * args,
+                                  const bplus::Object * args,
                                   int quality, std::string &oError)
 {
     ExceptionInfo exception;
@@ -472,7 +475,7 @@ static Image * grayscaleTransform(const Image * inImage,
 }
 
 static Image * psychedelicTransform(const Image * inImage,
-                                    const bp::Object * args,
+                                    const bplus::Object * args,
                                     int quality, std::string &oError)
 {
     ExceptionInfo exception;
@@ -491,7 +494,7 @@ static Image * psychedelicTransform(const Image * inImage,
 
 
 static Image * negateTransform(const Image * inImage,
-                               const bp::Object * args,
+                               const bplus::Object * args,
                                int quality, std::string &oError)
 {
     ExceptionInfo exception;
@@ -551,7 +554,7 @@ static MagickPassFail sepiaWorker(
 }
 
 static Image * sepiaTransform(const Image * inImage,
-                              const bp::Object * args,
+                              const bplus::Object * args,
                               int quality, std::string &oError)
 {
 	MagickPassFail status=MagickPass;
@@ -596,7 +599,7 @@ static Image * sepiaTransform(const Image * inImage,
 
 
 static Image * thresholdTransform(const Image * inImage,
-                                  const bp::Object * args,
+                                  const bplus::Object * args,
                                   int quality, std::string &oError)
 {
     double threshold = 128.0;
@@ -629,7 +632,7 @@ static Image * thresholdTransform(const Image * inImage,
 
 
 static Image * blackThresholdTransform(const Image * inImage,
-                                       const bp::Object * args,
+                                       const bplus::Object * args,
                                        int quality, std::string &oError)
 {
     double threshold = 50.0;

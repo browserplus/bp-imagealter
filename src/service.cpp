@@ -30,10 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "service.hh"
-#include "bptypeutil.hh"
-#include "bpurlutil.hh"
-#include "bpservicedescription.hh"
+#include "bpservice/bpservice.h"
 #include "ImageProcessor.hh"
 #include "Transformations.hh"
 #include "bp-file/bpfile.h"
@@ -45,6 +42,12 @@
 #include <iostream>
 #include <list>
 #include <sstream>
+
+// NEEDSWORK!!!  Delete this once we move to v5 and no longer need file uri's
+#include "bpurlutil.cpp"
+// END NEEDSWORK!!!
+
+#define IA_DEFAULT_QUALITY 75
 
 const BPCFunctionTable * g_bpCoreFunctions = NULL;
 
@@ -59,7 +62,7 @@ BPPAllocate(void ** instance, unsigned int, const BPElement * context)
     SessionData * sd = new SessionData;
 
     // extract the temporary directory
-    bp::Object * args = bp::Object::build(context);
+    bplus::Object * args = bplus::Object::build(context);
     sd->tempDir = (std::string) (*(args->get("temp_dir")));
     delete args;
 
@@ -106,12 +109,17 @@ BPPInvoke(void * instance, const char * funcName,
 
     // XXX: we need to get a little thready here
     
-    bp::Object * args = NULL;
-    if (elem) args = bp::Object::build(elem);
+    bplus::Object * args = NULL;
+    if (elem) args = bplus::Object::build(elem);
 
     // first we'll get the input file into a string
     std::string url = (*(args->get("file")));
+// NEEDSWORK!!!  Fix this when port to v5 since we don't need URI's anymore
+#if 0
+    std::string path = url;
+#else // 0
     std::string path = bp::urlutil::pathFromURL(url);
+#endif // 0
 
     if (path.empty())
     {
@@ -143,14 +151,14 @@ BPPInvoke(void * instance, const char * funcName,
     int quality = IA_DEFAULT_QUALITY;
     if (args->has("quality", BPTInteger)) {
         quality = (int)
-            (long long)*((const bp::Integer *)(args->get("quality")));
+            (long long)*((const bplus::Integer *)(args->get("quality")));
     }
 
     // finally, let's pull out the list of transformation actions
-    bp::List emptyList;
-    bp::List * lPtr = &emptyList;
+    bplus::List emptyList;
+    bplus::List * lPtr = &emptyList;
     
-    if (args->has("actions")) lPtr = (bp::List *) args->get("actions");
+    if (args->has("actions")) lPtr = (bplus::List *) args->get("actions");
 
     std::string err;
 
@@ -172,12 +180,12 @@ BPPInvoke(void * instance, const char * funcName,
     else
     {
         // success!
-        bp::Map m;
-        m.add("file", new bp::Path(rez));
-        m.add("width", new bp::Integer(x));
-        m.add("height", new bp::Integer(y));
-        m.add("orig_width", new bp::Integer(orig_x));
-        m.add("orig_height", new bp::Integer(orig_y));
+        bplus::Map m;
+        m.add("file", new bplus::Path(rez));
+        m.add("width", new bplus::Integer(x));
+        m.add("height", new bplus::Integer(y));
+        m.add("orig_width", new bplus::Integer(orig_x));
+        m.add("orig_height", new bplus::Integer(orig_y));
         g_bpCoreFunctions->postResults(tid, m.elemPtr());
     }
     
@@ -192,7 +200,7 @@ BPPInitialize(const BPCFunctionTable * bpCoreFunctions,
               const BPElement * parameterMap)
 {
     static bool s_initd = false;
-    static bp::service::Description s_desc;
+    static bplus::service::Description s_desc;
 
     if (!s_initd) {
         s_initd = true;
@@ -203,21 +211,21 @@ BPPInitialize(const BPCFunctionTable * bpCoreFunctions,
         s_desc.setDocString("Implements client side Image manipulation");
 
         // let's add functions, start with 'transform'
-        std::list<bp::service::Function> fs;
+        std::list<bplus::service::Function> fs;
 
         // arguments 
-        std::list<bp::service::Argument> as;
+        std::list<bplus::service::Argument> as;
 
-        bp::service::Argument file, actions, format, quality;
+        bplus::service::Argument file, actions, format, quality;
         file.setName("file");
         file.setRequired(true);
-        file.setType(bp::service::Argument::Path);
+        file.setType(bplus::service::Argument::Path);
         file.setDocString("The image to transform.");
         as.push_back(file);
 
         format.setName("format");
         format.setRequired(false);
-        format.setType(bp::service::Argument::String);
+        format.setType(bplus::service::Argument::String);
         format.setDocString("The format of the output image.  "
                             "Default is to output in the same "
                             "format as the input image.  A string, one of: "
@@ -227,7 +235,7 @@ BPPInitialize(const BPCFunctionTable * bpCoreFunctions,
 
         quality.setName("quality");
         quality.setRequired(false);
-        quality.setType(bp::service::Argument::Integer);
+        quality.setType(bplus::service::Argument::Integer);
         {
             std::stringstream ss;
             ss << "The quality of the output image.  "
@@ -241,7 +249,7 @@ BPPInitialize(const BPCFunctionTable * bpCoreFunctions,
 
         actions.setName("actions");
         actions.setRequired(false);
-        actions.setType(bp::service::Argument::List);
+        actions.setType(bplus::service::Argument::List);
         // generate documentation automatically.
         std::stringstream ss;
         ss << "An array of actions to perform.  Each action is either a "
@@ -260,7 +268,7 @@ BPPInitialize(const BPCFunctionTable * bpCoreFunctions,
         actions.setDocString(ss.str().c_str());
         as.push_back(actions);
 
-        bp::service::Function f;
+        bplus::service::Function f;
         f.setName("transform");
         f.setDocString("Perform a set of transformations on an input image");
         f.setArguments(as);

@@ -34,7 +34,7 @@
 #define __IMAGEPROCESSOR_HH__
 
 #include <string>
-#include "bptypeutil.hh"
+#include "bpservice/bpservice.h"
 
 namespace imageproc {
     
@@ -72,7 +72,7 @@ namespace imageproc {
         const std::string & inPath,
         const std::string & tmpdir,
         Type outputFormat,
-        const bp::List & transformations,
+        const bplus::List & transformations,
         int quality,
         unsigned int & x, unsigned int & y, 
         unsigned int & orig_x, unsigned int & orig_y, 

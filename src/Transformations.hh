@@ -5,8 +5,7 @@
 #ifndef __TRANSFORMATIONS_H__
 #define __TRANSFORMATIONS_H__
 
-#include "service.hh"
-#include "bptypeutil.hh"
+#include "bpservice/bpservice.h"
 
 #include <magick/api.h>
     
@@ -15,7 +14,7 @@ namespace trans {
      *  All image processing phases conform to this signature:
      */
     typedef Image * (*TransformationFunc)(const Image * inImage,
-                                          const bp::Object * args,
+                                          const bplus::Object * args,
                                           int quality, std::string &oError);
 
     typedef struct {

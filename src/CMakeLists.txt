@@ -46,8 +46,6 @@ INCLUDE_DIRECTORIES(
   "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-framework/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist/include/GraphicsMagick"
-  "${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools/CppTools/external/bpsdk/include"
-  "${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools/CppTools/src"
 )
 
 IF ("${CMAKE_BUILD_TYPE}" STREQUAL "CodeCoverage")
@@ -61,13 +59,6 @@ ELSE ()
     "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist/lib/${CMAKE_BUILD_TYPE}"
   )
 ENDIF ()
-
-SET(EXT_SRCS
-  ${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools/CppTools/src/bptypeutil.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools/CppTools/src/bpurlutil.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools/CppTools/src/bpservicedescription.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../external/bp-service-tools/CppTools/src/bpserviceversion.cpp
-)
 
 # add required OS libs here
 SET(OS_LIBS)
@@ -84,7 +75,7 @@ ELSE ()
        SET(OS_LIBS ${CARBON_LIBRARY})
    ENDIF()
 ENDIF ()
-SET(SRCS service.cpp Transformations.hh ImageProcessor.cpp ${EXT_SRCS})
+SET(SRCS service.cpp Transformations.hh ImageProcessor.cpp)
 SET(HDRS Transformations.cpp ImageProcessor.hh)
 SET(LIBS GraphicsMagick_s png_s jpeg_s zlib_s bpfile_s ${BOOST_LIBS} ${OS_LIBS})
 
