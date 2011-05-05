@@ -272,14 +272,12 @@ extractScalingDimensions(const char * funcName,
         y *= scale;
     }
 
-#if 0
     // log about it
-    g_bpCoreFunctions->log(
+    std::stringstream ss;
+    ss << "scaling parameters [mw: " << maxwidth << " | mh: " << maxheight << "]: from (" << origx << ", " << origy << ") to (" << x << ", " << y << ")";
+    bplus::service::Service::log(
         BP_INFO,
-        "scaling parameters [mw: %d | mh: %d]: "
-        "from (%lu, %lu) to (%lu, %lu)",
-        maxwidth, maxheight, origx, origy, x, y);
-#endif // 0
+        ss.str());
 
     return true;
 }
@@ -377,12 +375,11 @@ static Image * cropTransform(const Image * inImage,
     ri.x = x * cropParams[0];
     ri.y = y * cropParams[1];
 
-#if 0
-    g_bpCoreFunctions->log(
+    std::stringstream ss;
+    ss << "Cropping image (" << x << "x" << y << "): " << ri.width << "x" << ri.height << " starting at " << ri.x << "," << ri.y;
+    bplus::service::Service::log(
         BP_INFO,
-        "Cropping image (%lux%lu): %lux%lu starting at %lu,%lu",
-        x, y, ri.width, ri.height, ri.x, ri.y);
-#endif // 0
+        ss.str());
     
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
