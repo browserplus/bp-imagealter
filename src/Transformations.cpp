@@ -1,7 +1,5 @@
 #include "Transformations.hh"
-
 #include <sstream>
-
 #include <assert.h>
 #include <string.h>
 
@@ -9,85 +7,67 @@
 #define strcasecmp _stricmp
 #endif
 
-static Image * noopTransform(const Image * inImage,
-                             const bplus::Object * args,
-                             int quality, std::string &oError)
-{
+static Image*
+noopTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = CloneImage(inImage, 0, 0, 1, &exception);
+    Image* i = CloneImage(inImage, 0, 0, 1, &exception);
     DestroyExceptionInfo(&exception);
     return i;
 }
 
-
-static Image * blurTransform(const Image * inImage,
-                             const bplus::Object * args,
-                             int quality, std::string &oError)
-{
+static Image*
+blurTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = BlurImage(inImage, 1.0, 0.5, &exception);
+    Image* i = BlurImage(inImage, 1.0, 0.5, &exception);
     DestroyExceptionInfo(&exception);
     return i;
 }
 
-static Image * sharpenTransform(const Image * inImage,
-                             const bplus::Object * args,
-                             int quality, std::string &oError)
-{
+static Image*
+sharpenTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = SharpenImage(inImage, 2.0, 1.0, &exception);
+    Image* i = SharpenImage(inImage, 2.0, 1.0, &exception);
     DestroyExceptionInfo(&exception);
     return i;
 }
 
-static Image * unsharpenTransform(const Image * inImage,
-                             const bplus::Object * args,
-                             int quality, std::string &oError)
-{
+static Image*
+unsharpenTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = UnsharpMaskImage( inImage, 0, 0.5, 1, 0.05, &exception );
+    Image* i = UnsharpMaskImage(inImage, 0, 0.5, 1, 0.05, &exception);
     DestroyExceptionInfo(&exception);
     return i;
 }
 
-
-static Image * despeckleTransform(const Image * inImage,
-                                  const bplus::Object * args,
-                                  int quality, std::string &oError)
-{
+static Image*
+despeckleTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = DespeckleImage(inImage, &exception);
+    Image* i = DespeckleImage(inImage, &exception);
     DestroyExceptionInfo(&exception);
     return i;
 }
 
-
-static Image * enhanceTransform(const Image * inImage,
-                                const bplus::Object * args,
-                                int quality, std::string &oError)
-{
+static Image*
+enhanceTransform(const Image* inImage, const bplus::Object* args, int quality, std::string&oError) {
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = EnhanceImage(inImage, &exception);
+    Image* i = EnhanceImage(inImage, &exception);
     DestroyExceptionInfo(&exception);
     return i;
 }
 
-
-static Image * solarizeTransform(const Image * inImage,
-                                 const bplus::Object * args,
-                                 int quality, std::string &oError)
-{
+static Image*
+solarizeTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = CloneImage(inImage, 0, 0, 1, &exception);
-    if (!i) {
-        oError.append("couldn't clone image :/");        
+    Image* i = CloneImage(inImage, 0, 0, 1, &exception);
+    if (i == NULL) {
+        oError.append("couldn't clone image :/");
     } else if (!SolarizeImage(i, 1.0)) {
         oError.append("error during solarization occured");
         DestroyImage(i);
@@ -97,34 +77,30 @@ static Image * solarizeTransform(const Image * inImage,
     return i;
 }
 
-static Image * contrastTransform(const Image * inImage,
-                                 const bplus::Object * args,
-                                 int quality, std::string &oError)
-{
+static Image*
+contrastTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     int contrast = 1;
-    
     if (args) {
         if (args->type() != BPTInteger) {
-            oError.append("contrast takes a single numeric argument between "
-                          "-10 and 10");
+            oError.append("contrast takes a single numeric argument between -10 and 10");
             return NULL;
         }
-        contrast = (int) ((long long) *args);
+        contrast = (int)((long long)*args);
     }
-    
-
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = CloneImage(inImage, 0, 0, 1, &exception);
+    Image* i = CloneImage(inImage, 0, 0, 1, &exception);
     if (!i) {
-        oError.append("couldn't clone image :/");        
+        oError.append("couldn't clone image :/");
     } else {
         int sharpen = 1;
         if (contrast < 0) {
             sharpen = 0;
             contrast *= -1;
         }
-        if (contrast > 10) contrast = 10;
+        if (contrast > 10) {
+            contrast = 10;
+        }
         for (int x = 0; x < contrast; x++) {
             if (!ContrastImage(i, sharpen)) {
                 oError.append("error during contrast occured");
@@ -134,33 +110,25 @@ static Image * contrastTransform(const Image * inImage,
             }
         }
     }
-    
     DestroyExceptionInfo(&exception);
     return i;
 }
 
-
-
-static Image * oilpaintTransform(const Image * inImage,
-                                 const bplus::Object * args,
-                                 int quality, std::string &oError)
-{
+static Image*
+oilpaintTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = OilPaintImage( inImage, 2.0, &exception );
+    Image* i = OilPaintImage(inImage, 2.0, &exception);
     DestroyExceptionInfo(&exception);
     return i;
 }
 
-
-static Image * rotateTransform(const Image * inImage,
-                               const bplus::Object * args,
-                               int quality, std::string &oError)
-{
+static Image*
+rotateTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     double degrees = 90;
     if (args != NULL) {
         if (args->type() == BPTDouble) {
-            degrees = (double) *args;
+            degrees = (double)*args;
         } else if (args->type() == BPTInteger) {
             degrees = (double)((long long)(*args));
         } else {
@@ -168,23 +136,19 @@ static Image * rotateTransform(const Image * inImage,
             return NULL;
         }
     }
-    
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = RotateImage( inImage, degrees, &exception );
+    Image* i = RotateImage(inImage, degrees, &exception);
     DestroyExceptionInfo(&exception);
     return i;
 }
 
-
-static Image * swirlTransform(const Image * inImage,
-                              const bplus::Object * args,
-                              int quality, std::string &oError)
-{
+static Image*
+swirlTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     double degrees = 90;
     if (args != NULL) {
         if (args->type() == BPTDouble) {
-            degrees = (double) *args;
+            degrees = (double)*args;
         } else if (args->type() == BPTInteger) {
             degrees = (double)((long long)(*args));
         } else {
@@ -192,213 +156,168 @@ static Image * swirlTransform(const Image * inImage,
             return NULL;
         }
     }
-    
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = SwirlImage( inImage, degrees, &exception );
+    Image* i = SwirlImage(inImage, degrees, &exception);
     DestroyExceptionInfo(&exception);
     return i;
 }
 
-
 static bool
-extractScalingDimensions(const char * funcName,
-                         const Image * inImage,                         
-                         const bplus::Object * args,
-                         unsigned int &x,
-                         unsigned int &y,                         
-                         std::string &oError)
-{
-    x = y = 0;
+extractScalingDimensions(const char* funcName, const Image* inImage, const bplus::Object* args, unsigned int& x, unsigned int& y, std::string& oError) {
+    x = 0;
+    y = 0;
     int maxwidth = -1;
     int maxheight = -1;
-    
     assert(args != NULL);
-    
     if (args->type() != BPTMap) {
         oError.append(funcName);
-        oError.append(" accepts an object containing one or more "
-                      "of the properties: maxwidth, maxheight");
+        oError.append(" accepts an object containing one or more of the properties: maxwidth, maxheight");
         return NULL;
     }
-
-    bplus::Map::Iterator i(*((const bplus::Map *) args));
-    const char * k;
-    while (NULL != (k=i.nextKey())) {
-        int * num = NULL;
-        const bplus::Object * v = args->get(k);
-        if (!strcasecmp("maxwidth", k)) num = &maxwidth;
-        else if (!strcasecmp("maxheight", k)) num = &maxheight;
+    bplus::Map::Iterator i(*((const bplus::Map*)args));
+    const char* k;
+    while (NULL != (k = i.nextKey())) {
+        int* num = NULL;
+        const bplus::Object* v = args->get(k);
+        if (!strcasecmp("maxwidth", k)) {
+            num = &maxwidth;
+        }
+        else if (!strcasecmp("maxheight", k)) {
+            num = &maxheight;
+        }
         else {
             std::stringstream ss;
             ss << "invalid argument to " << funcName << ": " << k;
             oError = ss.str();
             return NULL;
         }
-
         if (v->type() != BPTInteger) {
             std::stringstream ss;
             ss << k << " requires an integer argument";
             oError = ss.str();
             return NULL;
         }
-
-        *num = (int)((long long) *v);
+        *num = (int)((long long)*v);
     }
-
     // wow.  parsing arguments is lame.  but we did it. maxheight and
     // maxwidth now contain values that we should constrain to
-    
     // first we'll determine the size of the input
     x = inImage->columns;
     y = inImage->rows;
-    unsigned int origx = x, origy = y;
-    if (maxwidth <= 0) maxwidth = x;
-    if (maxheight <= 0) maxheight = y;
-    
-    // squish 
-    if (x > (unsigned int) maxwidth)
-    {
-        double scale = (double) maxwidth / (double) x;
+    unsigned int origx = x;
+    unsigned int origy = y;
+    if (maxwidth <= 0) {
+        maxwidth = x;
+    }
+    if (maxheight <= 0) {
+        maxheight = y;
+    }
+    // squish
+    if (x > (unsigned int)maxwidth) {
+        double scale = (double)maxwidth / (double)x;
         x *= scale;
         y *= scale;
     }
-
-    // smush 
-    if (y > (unsigned int) maxheight)
-    {
-        double scale = (double) maxheight / (double) y;
+    // smush
+    if (y > (unsigned int)maxheight) {
+        double scale = (double)maxheight / (double)y;
         x *= scale;
         y *= scale;
     }
-
     // log about it
     std::stringstream ss;
     ss << "scaling parameters [mw: " << maxwidth << " | mh: " << maxheight << "]: from (" << origx << ", " << origy << ") to (" << x << ", " << y << ")";
-    bplus::service::Service::log(
-        BP_INFO,
-        ss.str());
-
+    bplus::service::Service::log(BP_INFO, ss.str());
     return true;
 }
 
-static Image * scaleTransform(const Image * inImage,
-                              const bplus::Object * args,
-                              int quality, std::string &oError)
-{
-    unsigned int x = 0, y = 0;
-    
-    if (!extractScalingDimensions("scale", inImage, args, x, y, oError))
-    {
+static Image* scaleTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
+    unsigned int x = 0;
+    unsigned int y = 0;
+    if (!extractScalingDimensions("scale", inImage, args, x, y, oError)) {
         return NULL;
     }
-    
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * img = ResizeImage(inImage, x, y, LanczosFilter, 1.0, &exception);
+    Image* img = ResizeImage(inImage, x, y, LanczosFilter, 1.0, &exception);
     DestroyExceptionInfo(&exception);
-
     return img;
 }
 
-static Image * thumbnailTransform(const Image * inImage,
-                                   const bplus::Object * args,
-                                   int quality, std::string &oError)
-{
-    unsigned int x = 0, y = 0;
-    
-    if (!extractScalingDimensions("thumbnail", inImage, args, x, y, oError))
-    {
+static Image*
+thumbnailTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
+    unsigned int x = 0;
+    unsigned int y = 0;
+    if (!extractScalingDimensions("thumbnail", inImage, args, x, y, oError)) {
         return NULL;
     }
-    
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * img = ThumbnailImage(inImage, x, y, &exception);
+    Image* img = ThumbnailImage(inImage, x, y, &exception);
     DestroyExceptionInfo(&exception);
-
     return img;
 }
 
-
-
-static Image * cropTransform(const Image * inImage,
-                             const bplus::Object * args,
-                             int quality, std::string &oError)
-{
+static Image*
+cropTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     // first we'll validate and extract parameters
     double cropParams[4];
     assert(args != NULL);
-    
-    if (!args || args->type() != BPTList ||
-        ((const bplus::List *) args)->size() != 4)
-    {
+    if (!args || args->type() != BPTList || ((const bplus::List *) args)->size() != 4) {
         oError.append("crop accepts an array of four floating point numbers");
         return NULL;
     }
-
-    const bplus::List * l = (const bplus::List *) args;
-    for (unsigned int i = 0; i < 4; i++)
-    {
+    const bplus::List* l = (const bplus::List*)args;
+    for (unsigned int i = 0; i < 4; i++) {
         if  (l->value(i)->type() == BPTDouble) {
-            cropParams[i] = (double) *(l->value(i));
+            cropParams[i] = (double)*(l->value(i));
         } else if (l->value(i)->type() == BPTInteger) {
             cropParams[i] = (double)((long long)*(l->value(i)));
         } else {
-            oError.append("crop accepts an array of four "
-                          "floating point numbers");
+            oError.append("crop accepts an array of four floating point numbers");
             return NULL;
         }
-
-        if (cropParams[i] < 0.0) cropParams[i] = 0.0;
-        if (cropParams[i] > 1.0) cropParams[i] = 1.0;
+        if (cropParams[i] < 0.0) {
+            cropParams[i] = 0.0;
+        }
+        if (cropParams[i] > 1.0) {
+            cropParams[i] = 1.0;
+        }
     }
-
     // validate arguments
     if (cropParams[0] >= cropParams[2] || cropParams[1] >= cropParams[3]) {
-        oError.append("meaningless crop parameters (x1/y1 may not be greater"
-                      " than x2/y2)");
+        oError.append("meaningless crop parameters (x1/y1 may not be greater than x2/y2)");
         return NULL;
     }
-
     // cropParams now contains x1, y1, x2, y2 in relative cordinates,
     // with origin at top left of image.  We'll use that information to
     // populate a RectangleInfo structure
-
     // extract existing image size
     unsigned int x = inImage->magick_columns;
     unsigned int y = inImage->magick_rows;
-
     RectangleInfo ri;
     ri.height = y * (cropParams[3] - cropParams[1]);
     ri.width = x * (cropParams[2] - cropParams[0]);
     ri.x = x * cropParams[0];
     ri.y = y * cropParams[1];
-
     std::stringstream ss;
     ss << "Cropping image (" << x << "x" << y << "): " << ri.width << "x" << ri.height << " starting at " << ri.x << "," << ri.y;
-    bplus::service::Service::log(
-        BP_INFO,
-        ss.str());
-    
+    bplus::service::Service::log(BP_INFO, ss.str());
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * img = CropImage( inImage, &ri, &exception );
+    Image* img = CropImage(inImage, &ri, &exception);
     DestroyExceptionInfo(&exception);
-
     return img;
 }
 
-
-static Image * equalizeTransform(const Image * inImage,
-                                  const bplus::Object * args,
-                                  int quality, std::string &oError)
-{
+static Image*
+equalizeTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = CloneImage(inImage, 0, 0, 1, &exception);
+    Image* i = CloneImage(inImage, 0, 0, 1, &exception);
     if (!i) {
-        oError.append("couldn't clone image :/");        
+        oError.append("couldn't clone image :/");
     } else if (!EqualizeImage(i)) {
         oError.append("error occured during equalization");
         DestroyImage(i);
@@ -408,15 +327,13 @@ static Image * equalizeTransform(const Image * inImage,
     return i;
 }
 
-static Image * normalizeTransform(const Image * inImage,
-                                  const bplus::Object * args,
-                                  int quality, std::string &oError)
-{
+static Image*
+normalizeTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = CloneImage(inImage, 0, 0, 1, &exception);
+    Image* i = CloneImage(inImage, 0, 0, 1, &exception);
     if (!i) {
-        oError.append("couldn't clone image :/");        
+        oError.append("couldn't clone image :/");
     } else if (!NormalizeImage(i)) {
         oError.append("error occured during normalization");
         DestroyImage(i);
@@ -426,16 +343,13 @@ static Image * normalizeTransform(const Image * inImage,
     return i;
 }
 
-
-static Image * ditherTransform(const Image * inImage,
-                               const bplus::Object * args,
-                               int quality, std::string &oError)
-{
+static Image*
+ditherTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = CloneImage(inImage, 0, 0, 1, &exception);
+    Image* i = CloneImage(inImage, 0, 0, 1, &exception);
     if (!i) {
-        oError.append("couldn't clone image :/");        
+        oError.append("couldn't clone image :/");
     } else if (!OrderedDitherImage(i)) {
         oError.append("error occured during ditherizasification");
         DestroyImage(i);
@@ -445,41 +359,33 @@ static Image * ditherTransform(const Image * inImage,
     return i;
 }
 
-
-static Image * grayscaleTransform(const Image * inImage,
-                                  const bplus::Object * args,
-                                  int quality, std::string &oError)
-{
+static Image*
+grayscaleTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     ExceptionInfo exception;
     QuantizeInfo qi;
     GetExceptionInfo(&exception);
     GetQuantizeInfo(&qi);
-
     qi.colorspace = GRAYColorspace;
-
-    Image * i = CloneImage(inImage, 0, 0, 1, &exception);
+    Image* i = CloneImage(inImage, 0, 0, 1, &exception);
     if (!i) {
-        oError.append("couldn't clone image :/");        
+        oError.append("couldn't clone image :/");
     } else if (!QuantizeImage(&qi, i)) {
         oError.append("error during grayscale quantize phase occured");
         DestroyImage(i);
         i = NULL;
     }
-
-//    DestroyQuantizeInfo(&qi);
+    //DestroyQuantizeInfo(&qi);
     DestroyExceptionInfo(&exception);
     return i;
 }
 
-static Image * psychedelicTransform(const Image * inImage,
-                                    const bplus::Object * args,
-                                    int quality, std::string &oError)
-{
+static Image*
+psychedelicTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = CloneImage(inImage, 0, 0, 1, &exception);
+    Image* i = CloneImage(inImage, 0, 0, 1, &exception);
     if (!i) {
-        oError.append("couldn't clone image :/");        
+        oError.append("couldn't clone image :/");
     } else if (!CycleColormapImage(i, 8)) {
         oError.append("error during psychedlic occured");
         DestroyImage(i);
@@ -489,16 +395,13 @@ static Image * psychedelicTransform(const Image * inImage,
     return i;
 }
 
-
-static Image * negateTransform(const Image * inImage,
-                               const bplus::Object * args,
-                               int quality, std::string &oError)
-{
+static Image*
+negateTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = CloneImage(inImage, 0, 0, 1, &exception);
+    Image* i = CloneImage(inImage, 0, 0, 1, &exception);
     if (!i) {
-        oError.append("couldn't clone image :/");        
+        oError.append("couldn't clone image :/");
     } else if (!NegateImage(i, 0)) {
         oError.append("error during negate occured");
         DestroyImage(i);
@@ -508,101 +411,89 @@ static Image * negateTransform(const Image * inImage,
     return i;
 }
 
-
-static MagickPassFail sepiaWorker(
-	void *mutable_data,         /* User provided mutable data */
-	const void *immutable_data, /* User provided immutable data */
-	Image *image,               /* Modify image */
-	PixelPacket *pixels,        /* Pixel row */
-	IndexPacket *indexes,       /* Pixel row indexes */
-	const long npixels,         /* Number of pixels in row */
-	ExceptionInfo *exception)   /* Exception report */
-{
-	// Modified version of algorithm from:
-	//     http://blogs.techrepublic.com.com/howdoi/?p=120
-	//
-  	for (long i=0; i < npixels; i++) {
-		float r1 = (float)pixels[i].red;
-		float g1 = (float)pixels[i].green;
-		float b1 = (float)pixels[i].blue;
-
-		// Changed the factors to 
-		//   (1) make filter less yellow and
-		//   (2) make filter less bright
-		float r2 = (r1 * 0.373 + g1 * 0.731 + b1 * 0.180);
-		float g2 = (r1 * 0.298 + g1 * 0.586 + b1 * 0.143);
-		float b2 = (r1 * 0.219 + g1 * 0.431 + b1 * 0.105);
-
-		// Original factors
-		// float r2 = (r1 * .393 + g1 *.769 + b1 * .189);
-		// float g2 = (r1 * .349 + g1 *.686 + b1 * .168);
-		// float b2 = (r1 * .272 + g1 *.534 + b1 * .131);
-
-		if (r2 > MaxRGB) r2 = MaxRGB;
-		if (g2 > MaxRGB) g2 = MaxRGB;
-		if (b2 > MaxRGB) b2 = MaxRGB;
-
-		pixels[i].red   = r2;
-		pixels[i].green = g2;
-		pixels[i].blue  = b2;
-	}
-  
-	return MagickPass;
+static MagickPassFail sepiaWorker(void* mutable_data,         /* User provided mutable data */
+                                  const void* immutable_data, /* User provided immutable data */
+                                  Image* image,               /* Modify image */
+                                  PixelPacket* pixels,        /* Pixel row */
+                                  IndexPacket* indexes,       /* Pixel row indexes */
+                                  const long npixels,         /* Number of pixels in row */
+                                  ExceptionInfo* exception) { /* Exception report */
+    // Modified version of algorithm from:
+    //     http://blogs.techrepublic.com.com/howdoi/?p=120
+    //
+    for (long i=0; i < npixels; i++) {
+        float r1 = (float)pixels[i].red;
+        float g1 = (float)pixels[i].green;
+        float b1 = (float)pixels[i].blue;
+        // Changed the factors to
+        //   (1) make filter less yellow and
+        //   (2) make filter less bright
+        float r2 = (r1 * 0.373 + g1 * 0.731 + b1 * 0.180);
+        float g2 = (r1 * 0.298 + g1 * 0.586 + b1 * 0.143);
+        float b2 = (r1 * 0.219 + g1 * 0.431 + b1 * 0.105);
+        // Original factors
+        // float r2 = (r1 * .393 + g1 *.769 + b1 * .189);
+        // float g2 = (r1 * .349 + g1 *.686 + b1 * .168);
+        // float b2 = (r1 * .272 + g1 *.534 + b1 * .131);
+        if (r2 > MaxRGB) {
+            r2 = MaxRGB;
+        }
+        if (g2 > MaxRGB) {
+            g2 = MaxRGB;
+        }
+        if (b2 > MaxRGB) {
+            b2 = MaxRGB;
+        }
+        pixels[i].red   = r2;
+        pixels[i].green = g2;
+        pixels[i].blue  = b2;
+    }
+    return MagickPass;
 }
 
-static Image * sepiaTransform(const Image * inImage,
-                              const bplus::Object * args,
-                              int quality, std::string &oError)
-{
-	MagickPassFail status=MagickPass;
+static Image* sepiaTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
+    MagickPassFail status = MagickPass;
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-    Image * i = CloneImage(inImage, 0, 0, 1, &exception);
-
+    Image* i = CloneImage(inImage, 0, 0, 1, &exception);
     if (!i) {
-        oError.append("couldn't clone image :/");        
-	} else {
-		status=PixelIterateMonoModify(
-			sepiaWorker,
-			NULL, // const PixelIteratorOptions *options
-			NULL, // const char *description
-			NULL, // void *mutable_data
-			NULL, // const void *immutable_data
-			0, // const long x
-			0, // const long y
-			i->columns, // const unsigned long columns, 
-			i->rows, // const unsigned long rows, 
-			i,
-			&exception);
-		
-		if (status == MagickFail) {
-        	oError.append("error during sepia quanitzation occured");
-        	DestroyImage(i);
-        	i = NULL;
-		} else {
-			// Remove contrast.  Could blow up the highlights on certain pictures.
-			// Let the user add contrast if required.
-			/*
-			// Add some little contrast to sepia toned image.  Looks much better with contrast.
-			i = contrastTransform(i, NULL, 100, oError);
-			*/
+        oError.append("couldn't clone image :/");
+    } else {
+        status = PixelIterateMonoModify(sepiaWorker,
+                                        NULL,       // const PixelIteratorOptions *options
+                                        NULL,       // const char *description
+                                        NULL,       // void *mutable_data
+                                        NULL,       // const void *immutable_data
+                                        0,          // const long x
+                                        0,          // const long y
+                                        i->columns, // const unsigned long columns,
+                                        i->rows,    // const unsigned long rows,
+                                        i,
+                                        &exception);
+        if (status == MagickFail) {
+            oError.append("error during sepia quanitzation occured");
+            DestroyImage(i);
+            i = NULL;
+        } else {
+            // Remove contrast.  Could blow up the highlights on certain pictures.
+            // Let the user add contrast if required.
+#if 0
+            // Add some little contrast to sepia toned image.  Looks much better with contrast.
+            i = contrastTransform(i, NULL, 100, oError);
+#endif // 0
 
-		}
-	}
-
+        }
+    }
     DestroyExceptionInfo(&exception);
     return i;
 }
 
-
-static Image * thresholdTransform(const Image * inImage,
-                                  const bplus::Object * args,
-                                  int quality, std::string &oError)
-{
+static Image*
+thresholdTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     double threshold = 128.0;
     if (args != NULL) {
         if (args->type() == BPTDouble) {
-            threshold = (double) *args;
+            threshold = (double)*args;
         } else if (args->type() == BPTInteger) {
             threshold = (double)((long long)(*args));
         } else {
@@ -610,32 +501,28 @@ static Image * thresholdTransform(const Image * inImage,
             return NULL;
         }
     }
-    if (threshold < 0.0) threshold = 0.0;
-    if (threshold > 256.0) threshold = 256.0;
-
+    if (threshold < 0.0) {
+        threshold = 0.0;
+    }
+    if (threshold > 256.0) {
+        threshold = 256.0;
+    }
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-
-    Image * i = CloneImage(inImage, 0, 0, 1, &exception);
-    if ( !ThresholdImage( i, threshold ) )
-    {
-        DestroyImage(i);        
+    Image* i = CloneImage(inImage, 0, 0, 1, &exception);
+    if (!ThresholdImage(i, threshold)) {
+        DestroyImage(i);
         i = NULL;
     }
     DestroyExceptionInfo(&exception);
     return i;
 }
 
-
-
-static Image * blackThresholdTransform(const Image * inImage,
-                                       const bplus::Object * args,
-                                       int quality, std::string &oError)
-{
+static Image* blackThresholdTransform(const Image* inImage, const bplus::Object* args, int quality, std::string& oError) {
     double threshold = 50.0;
     if (args != NULL) {
         if (args->type() == BPTDouble) {
-            threshold = (double) *args;
+            threshold = (double)*args;
         } else if (args->type() == BPTInteger) {
             threshold = (double)((long long)(*args));
         } else {
@@ -643,33 +530,31 @@ static Image * blackThresholdTransform(const Image * inImage,
             return NULL;
         }
     }
-    if (threshold < 0.0) threshold = 0.0;
-    if (threshold > 100.0) threshold = 100.0;
-
+    if (threshold < 0.0) {
+        threshold = 0.0;
+    }
+    if (threshold > 100.0) {
+        threshold = 100.0;
+    }
     char thresholdString[10];
     sprintf(thresholdString, "%d%%", (int) threshold);
-    
     ExceptionInfo exception;
     GetExceptionInfo(&exception);
-
-    Image * i = CloneImage(inImage, 0, 0, 1, &exception);
-    if (!BlackThresholdImage( i, thresholdString ))
-    {
-        DestroyImage(i);        
+    Image* i = CloneImage(inImage, 0, 0, 1, &exception);
+    if (!BlackThresholdImage(i, thresholdString)) {
+        DestroyImage(i);
         i = NULL;
     }
     DestroyExceptionInfo(&exception);
     return i;
 }
 
-
-
 static trans::Transformation s_transMap[] = {
     {
         "contrast", true, false, contrastTransform,
         "adjust the image's contrast, accepts an optional numeric argument "
         "between -10 and 10"
-    },    
+    },
     {
         "black_threshold", true, false, blackThresholdTransform,
         "Given a threshold (in terms of percentage from 0-100), color all "
@@ -678,13 +563,13 @@ static trans::Transformation s_transMap[] = {
     {
         "blur", false, false, blurTransform,
         "blur (or 'smooth') an image"
-    },    
+    },
     {
         "crop", true, true, cropTransform,
         "select a subset of an image, accepts an array of four floating point "
         "numbers: x1,y1,x2,y2 which are between 0.0 and 1.0 and are relative "
         "coordinates to the upper left hand corner of the image"
-    },    
+    },
     {
         "despeckle", false, false, despeckleTransform,
         "reduces the speckle noise in an image while perserving the edges of "
@@ -698,7 +583,7 @@ static trans::Transformation s_transMap[] = {
         "enhance", false, false, enhanceTransform,
         "Applies a digital filter that improves the quality of a noisy image, "
         "accepts no arguments "
-    },    
+    },
     {
         "equalize", false, false, equalizeTransform,
         "Applies a histogram equalization to the image."
@@ -707,11 +592,11 @@ static trans::Transformation s_transMap[] = {
     {
         "grayscale", false, false, grayscaleTransform,
         "remove the color from an image, accepts no arguments"
-    },    
+    },
     {
         "greyscale", true, true, grayscaleTransform,
         "an alias for 'grayscale'"
-    },    
+    },
     {
         "negate", false, false, negateTransform,
         "negate the colors of the image, accepts no arguments"
@@ -728,7 +613,7 @@ static trans::Transformation s_transMap[] = {
         "oilpaint", false, false, oilpaintTransform,
         "an effect that will make the image look like an oil painting, "
         "accepts no arguments"
-    },    
+    },
     {
         "psychedelic", false, false, psychedelicTransform,
         "trip out an image.  takes no arguments.  may be applied multiple "
@@ -744,15 +629,15 @@ static trans::Transformation s_transMap[] = {
         "downscale an image preserving aspect ratio.  you may provide the "
         "integer arguments maxwidth and/or maxheight which limit the image "
         "in the specified direction.  units are pixels."
-    },    
+    },
     {
         "sepia", false, false, sepiaTransform,
         "sepia tone an image.  no arguments."
-    },    
+    },
     {
         "sharpen", false, false, sharpenTransform,
         "sharpen an image"
-    },    
+    },
     {
         "solarize", false, false, solarizeTransform,
         "solarize an image.  no arguments"
@@ -775,7 +660,7 @@ static trans::Transformation s_transMap[] = {
         "combine with a relatively high 'quality' argument (75-85) for "
         "the best balance between speed and quality.  Accepts the same "
         "arguments as 'scale'."
-    },    
+    },
     {
         "unsharpen", false, false, unsharpenTransform,
         "unsharpen an image"
@@ -783,14 +668,12 @@ static trans::Transformation s_transMap[] = {
 };
 
 unsigned int
-trans::num()
-{
-    return sizeof(s_transMap)/sizeof(s_transMap[0]);
+trans::num() {
+    return sizeof(s_transMap) / sizeof(s_transMap[0]);
 }
 
-const trans::Transformation *
-trans::get(unsigned int i)
-{
+const trans::Transformation*
+trans::get(unsigned int i) {
     return s_transMap + i;
 }
 
@@ -798,9 +681,8 @@ trans::get(unsigned int i)
 #define strcasecmp _stricmp
 #endif
 
-const trans::Transformation *
-trans::get(const std::string & name)
-{
+const trans::Transformation*
+trans::get(const std::string& name) {
     for (unsigned int i = 0; i < num(); i++) {
         if (!strcasecmp(name.c_str(), get(i)->name)) return get(i);
     }

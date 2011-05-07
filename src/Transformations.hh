@@ -6,33 +6,26 @@
 #define __TRANSFORMATIONS_H__
 
 #include "bpservice/bpservice.h"
-
 #include <magick/api.h>
-    
-namespace trans {
-    /**
-     *  All image processing phases conform to this signature:
-     */
-    typedef Image * (*TransformationFunc)(const Image * inImage,
-                                          const bplus::Object * args,
-                                          int quality, std::string &oError);
 
+namespace trans {
+    /** All image processing phases conform to this signature: */
+    typedef Image* (*TransformationFunc)(const Image* inImage, const bplus::Object* args, int quality, std::string &oError);
     typedef struct {
         // the name of the transformation (as a client would specify it)
-        const char * name;
+        const char* name;
         // does this accept arguments?
         bool acceptsArgs;
         // does this require arguments?
         bool requiresArgs;
-        // the function that actually performs work 
+        // the function that actually performs work
         TransformationFunc transform;
         // documentation
-        const char * doc;
+        const char* doc;
     } Transformation;
-
     unsigned int num();
-    const Transformation * get(unsigned int);
-    const Transformation * get(const std::string & name);
+    const Transformation* get(unsigned int);
+    const Transformation* get(const std::string& name);
 };
 
 #endif
