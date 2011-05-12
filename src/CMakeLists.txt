@@ -81,11 +81,3 @@ SET(LIBS GraphicsMagick_s png_s jpeg_s zlib_s bpfile_s ${BOOST_LIBS} ${OS_LIBS})
 
 BPAddCppService()
 
-# copy in magic.mgk - an xml lookup table that allows graphics magick
-# to quickly identify files based on content, and is required for GM
-# to work
-SET(PATH_TO_MAGIC_MGK "${CMAKE_CURRENT_SOURCE_DIR}/../external/dist/share/GraphicsMagick-1.3.7/config/magic.mgk")
-ADD_CUSTOM_COMMAND(
-  TARGET ${SERVICE_NAME} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different \"${PATH_TO_MAGIC_MGK}\" \"${OUTPUT_DIR}\")
-

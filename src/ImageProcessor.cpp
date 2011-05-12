@@ -57,7 +57,6 @@ const imageproc::Type imageproc::UNKNOWN = NULL;
 void
 imageproc::init() {
     unsigned int i;
-    RegisterStaticModules();
     InitializeMagick(NULL);
     // let's output a startup banner with available image type support
     ExceptionInfo exception;
